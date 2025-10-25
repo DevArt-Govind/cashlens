@@ -8,6 +8,7 @@ function authMiddleware(req, res, next) {
     return next(); // Skip auth for OPTIONS requests
   }
   const user = JSON.parse(req.headers['user'] || 'null'); // dev-only
+  console.log('User header:', user);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   req.user = user;
   next();
@@ -17,8 +18,18 @@ router.use(authMiddleware);
 
 // Delete transaction
 router.delete('/:id', async (req, res) => {
-  await Transaction.destroy({ where: { id: req.params.id } });
-  res.json({ message: 'Transaction deleted' });
+  try {
+    const result = await Transaction.destroy({ where: { id: req.params.id } });
+    if (result === 0) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.json({ message: 'Transaction deleted' });
+  } catch (err) {
+    console.error('Error deleting transaction:', err);
+    res.status(500).json({ message: 'Server error while deleting transaction', error: err.message });
+  }
+  // await Transaction.destroy({ where: { id: req.params.id } });
+  // res.json({ message: 'Transaction deleted' });
 });
 
 // Update a transaction
@@ -96,4 +107,5 @@ router.post('/', async (req, res) => {
 
 
 module.exports = router;
+
 
