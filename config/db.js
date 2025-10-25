@@ -34,23 +34,43 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-// Use DATABASE_URL from environment variables
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: { require: true, rejectUnauthorized: false },
-  },
-  logging: false, // set to console.log for debugging
-});
+const isDev = process.env.DEV_MODE === 'true';
 
-async function testConnection() {
+let sequelize;
+
+if (isDev) {
+  console.log('🧪 Using local database for development');
+  sequelize = new Sequelize('finance_db', 'sa', 'bhardwajboy352', {
+    host: 'localhost\\SQLEXPRESS',
+    dialect: 'mssql',
+    logging: console.log
+  });
+} else {
+  console.log('🌐 Using Neon PostgreSQL');
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is missing. Add it in .env or Render Environment.');
+  }
+
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: false
+  });
+}
+
+// Test connection
+(async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Connected to Neon PostgreSQL successfully.');
+    console.log('✅ Database connected successfully');
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error('❌ DB connection failed:', error.message);
   }
-}
-testConnection();
+})();
 
 module.exports = sequelize;
