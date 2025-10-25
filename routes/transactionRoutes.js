@@ -4,12 +4,14 @@ const Transaction = require('../models/transaction');
 
 // Simple auth middleware for dev
 function authMiddleware(req, res, next) {
+  if (req.method === 'OPTIONS') {
+    return next(); // Skip auth for OPTIONS requests
+  }
   const user = JSON.parse(req.headers['user'] || 'null'); // dev-only
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   req.user = user;
   next();
 }
-
 // Apply middleware to all transaction routes
 router.use(authMiddleware);
 
@@ -94,3 +96,4 @@ router.post('/', async (req, res) => {
 
 
 module.exports = router;
+
