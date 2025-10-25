@@ -20,7 +20,8 @@ app.use(bodyParser.json());
 // 🧩 CORS setup
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  'http://localhost:4200'
+  'http://localhost:4200',
+  'https://cashlens.netlify.app'
 ];
 
 app.use(cors({
@@ -101,3 +102,4 @@ sequelize.sync({ alter: true })
 
 
 module.exports = app;
+
