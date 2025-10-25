@@ -38,13 +38,23 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
+  allowedHeaders: ['Content-Type','Authorization','user'],
+  preflightContinue: true,
+  optionsSuccessStatus: 204
 }));
 
 // Routes
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/budgets', budgetRoutes);
+
+// Optional: Global error handling middleware to ensure CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,user');
+  next();
+});
 
 // DB Sync and Server Start
 // sequelize.sync({ alter: true }) // auto creates tables and columns if missing
@@ -102,5 +112,6 @@ sequelize.sync({ alter: true })
 
 
 module.exports = app;
+
 
 
