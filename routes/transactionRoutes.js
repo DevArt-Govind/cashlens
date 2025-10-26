@@ -19,6 +19,7 @@ router.use(authMiddleware);
 // Delete transaction
 router.delete('/:id', async (req, res) => {
   try {
+    const id = Number(req.params.id);
     const result = await Transaction.destroy({ where: { id: req.params.id } });
     if (result === 0) {
       return res.status(404).json({ message: 'Transaction not found' });
@@ -57,17 +58,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// disconnecting DB
-
-const isDev = process.env.DEV_MODE === 'false';
-// / 🔸 Store dynamic user data in memory (cleared when server restarts)
-let tempTransactions = [];
-
 router.get('/', async (req, res) => {
-  if (isDev) {
-    return res.json(tempTransactions);
-  }
-
   try {
     const user = req.user;
     const transactions = await Transaction.findAll({ where: { userId: user.id } });
@@ -79,16 +70,6 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-
-  if (isDev) {
-    const newTx = {
-      id: Date.now(),
-      ...req.body
-    };
-    tempTransactions.push(newTx);
-    return res.status(201).json(newTx);
-  }
-
   try {
     const user = req.user; 
      if (!user) {
@@ -101,11 +82,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// disconnecting DB end
-
-
-
-
 module.exports = router;
+
 
 
